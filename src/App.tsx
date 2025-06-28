@@ -68,8 +68,8 @@ function App() {
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!startRef.current) return;
     const touch = e.touches[0];
-    const dx = touch.clientX - startRef.current.x;
-    const dy = touch.clientY - startRef.current.y;
+    const dx = (touch.clientX - startRef.current.x) * 0.3;
+    const dy = (touch.clientY - startRef.current.y) * 0.3;
     setPosition({
       x: lastPosRef.current.x + dx,
       y: lastPosRef.current.y + dy,
