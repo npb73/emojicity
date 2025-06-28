@@ -18,12 +18,42 @@ interface house {
 
 interface HousesRendererProps {
   items: house[];
+  position: { x: number; y: number };
 }
 
-function HousesRenderer({ items }: HousesRendererProps) {
-  // Состояние для позиции контейнера
+function HousesRenderer({ items, position }: HousesRendererProps) {
+  return (
+    <div
+      className={styles.houses_container}
+      style={{
+        transform: `translate(${position.x}px, ${position.y}px)`,
+        touchAction: "none", // Отключаем скролл браузера при drag
+      }}
+    >
+      {/* Рендерим дома */}
+      {items.map((house) => (
+        <div key={house.id} className={styles.house_container}>
+          <div className={styles.house_emoji}>{house.emoji}</div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function App() {
+  const houses: house[] = [
+    {
+      id: '1',
+      emoji: '🏠',
+      unlockPrice: 100,
+      profit: 10,
+      price: [{wood: 10, stone: 10}],
+      coords: {x: 0, y: 0},
+    },
+  ];
+
+  // Состояние для позиции всей сцены
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-  // Для хранения стартовой точки касания и позиции
   const startRef = useRef<{ x: number; y: number } | null>(null);
   const lastPosRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
 
@@ -53,42 +83,15 @@ function HousesRenderer({ items }: HousesRendererProps) {
 
   return (
     <div
-      className={styles.houses_container}
-      style={{
-        transform: `translate(${position.x}px, ${position.y}px)`,
-        touchAction: "none", // Отключаем скролл браузера при drag
-      }}
+      className={styles.main_container}
+      style={{ touchAction: "none" }} // Отключаем скролл браузера при drag
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      {/* Рендерим дома */}
-      {items.map((house) => (
-        <div key={house.id} className={styles.house_container}>
-          <div className={styles.house_emoji}>{house.emoji}</div>
-        </div>
-      ))}
+      <HousesRenderer items={houses} position={position} />
     </div>
   );
-}
-
-function App() {
-  const houses: house[] = [
-    {
-      id: '1',
-      emoji: '🏠',
-      unlockPrice: 100,
-      profit: 10,
-      price: [{wood: 10, stone: 10}],
-      coords: {x: 0, y: 0},
-    },
-  ]
-
-  return (
-    <div className={styles.main_container}>
-      <HousesRenderer items={houses} />
-    </div>
-  )
 }
 
 export default App
