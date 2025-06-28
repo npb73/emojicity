@@ -24,6 +24,24 @@ interface HousesRendererProps {
   position: { x: number; y: number };
 }
 
+// Мемоизированный компонент для одного дома
+interface HouseProps {
+  house: house;
+}
+
+const House: React.FC<HouseProps> = React.memo(({ house }) => (
+  <div
+    className={styles.house_container}
+    style={{
+      transform: `translate(${house.coords.x}px, ${house.coords.y}px)`,
+    }}
+  >
+    <div className={`${styles.house_emoji} ${house.triggered ? styles.triggered_house : ''}`}>
+      {house.emoji}
+    </div>
+  </div>
+));
+
 function HousesRenderer({ items, position }: HousesRendererProps) {
   return (
     <div
@@ -33,16 +51,9 @@ function HousesRenderer({ items, position }: HousesRendererProps) {
         touchAction: "none", // Отключаем скролл браузера при drag
       }}
     >
-      {/* Рендерим дома */}
+      {/* Рендерим дома через мемоизированный компонент */}
       {items.map((house) => (
-        <div 
-          className={styles.house_container}
-          style={{
-            transform: `translate(${house.coords.x}px, ${house.coords.y}px)`,
-          }}
-        >
-          <div className={`${styles.house_emoji} ${house.triggered ? styles.triggered_house : ''}`}>{house.emoji}</div>
-        </div>
+        <House key={house.id} house={house} />
       ))}
     </div>
   );
@@ -61,18 +72,19 @@ function App() {
       triggered: false,
     },
   ]);
+  
   useEffect(() => {
     for(let i = 0; i < 100; i++) {
       for(let j = 0; j < 100; j++) {
         houses.push({
-          id: i.toString(),
+          id: i.toString() + 'h' + j.toString(),
           emoji: '⛺️',
           unlockPrice: 100,
           profit: 10,
           price: [{ wood: 10, stone: 10 }],
           coords: {
-            x: i*70,
-            y: j*70
+            x: i*30,
+            y: j*30
           },
           triggered: false
         })
@@ -121,7 +133,7 @@ function App() {
 
   // Троттлим всю функцию
   const throttledHandleHousesInCircle = useRef(
-    throttle(handleHousesInCircle, 50)
+    throttle(handleHousesInCircle, 100)
   ).current;
 
   useEffect(() => {
