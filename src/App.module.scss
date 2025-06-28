@@ -42,7 +42,7 @@ html, body {
         }
 
         .triggered_house {
-            animation: triggered 0.15s ease-in-out;
+            animation: triggered 0.15s ease-out;
         }
     }
 }
@@ -58,11 +58,7 @@ html, body {
 
 @keyframes triggered {
     0% {
-        scale: 1 1;
-    }
-
-    50% {
-        scale: 0.5 2;
+        scale: 1.5 1.5;
 
     }
 
