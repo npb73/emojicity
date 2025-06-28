@@ -1,5 +1,6 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styles from "./App.module.scss"
+import { throttle } from 'lodash';
 
 type materialName = 'wood' | 'stone' | 'iron' | 'detail' | 'electicity' | 'science';
 
@@ -14,6 +15,7 @@ interface house {
   profit: number,
   price: Price,
   coords: Coords,
+  triggered: boolean,
 }
 
 interface HousesRendererProps {
@@ -32,7 +34,13 @@ function HousesRenderer({ items, position }: HousesRendererProps) {
     >
       {/* Рендерим дома */}
       {items.map((house) => (
-        <div key={house.id} className={styles.house_container}>
+        <div 
+          key={house.id} 
+          className={styles.house_container}
+          style={{
+            transform: `translate(${house.coords.x}px, ${house.coords.y}px)`,
+          }}
+        >
           <div className={styles.house_emoji}>{house.emoji}</div>
         </div>
       ))}
@@ -41,16 +49,58 @@ function HousesRenderer({ items, position }: HousesRendererProps) {
 }
 
 function App() {
-  const houses: house[] = [
+  // Состояние для домов (чтобы можно было менять triggered)
+  const [houses, setHouses] = useState<house[]>([
     {
-      id: '1',
-      emoji: '🏠',
+      id: 'tent',
+      emoji: '⛺️',
       unlockPrice: 100,
       profit: 10,
       price: [{wood: 10, stone: 10}],
       coords: {x: 0, y: 0},
+      triggered: false,
     },
-  ];
+  ]);
+
+  // Счёт
+  const [score, setScore] = useState(0);
+
+  // Радиус поиска (можно менять)
+  const radius = window.innerHeight * 0.1;
+
+  // Вся логика поиска и начисления баллов
+  const handleHousesInCircle = (houses: house[], position: { x: number; y: number }, radius: number) => {
+    const housesInCircle = houses.filter(h => {
+      const dx = h.coords.x - position.x;
+      const dy = h.coords.y - position.y;
+      return Math.sqrt(dx * dx + dy * dy) <= radius;
+    });
+
+    setHouses(prev =>
+      prev.map(h => {
+        if (housesInCircle.includes(h) && !h.triggered) {
+          setScore(s => s + 1);
+          return { ...h, triggered: true };
+        }
+        if (!housesInCircle.includes(h) && h.triggered) {
+          // Если дом вне круга и был triggered — сбрасываем
+          return { ...h, triggered: false };
+        }
+        return h;
+      })
+    );
+
+    console.log(housesInCircle);
+  };
+
+  // Троттлим всю функцию
+  const throttledHandleHousesInCircle = useRef(
+    throttle(handleHousesInCircle, 100)
+  ).current;
+
+  useEffect(() => {
+    console.log(score);
+  }, [score]);
 
   // Состояние для позиции всей сцены
   const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -68,12 +118,16 @@ function App() {
   const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
     if (!startRef.current) return;
     const touch = e.touches[0];
-    const dx = (touch.clientX - startRef.current.x) * 0.3;
-    const dy = (touch.clientY - startRef.current.y) * 0.3;
-    setPosition({
+    const dx = touch.clientX - startRef.current.x;
+    const dy = touch.clientY - startRef.current.y;
+    const newPosition = {
       x: lastPosRef.current.x + dx,
       y: lastPosRef.current.y + dy,
-    });
+    };
+    setPosition(newPosition);
+
+    // Вся логика теперь троттлится
+    throttledHandleHousesInCircle(houses, newPosition, radius);
   };
 
   // Обработчик окончания тача
@@ -90,6 +144,7 @@ function App() {
       onTouchEnd={handleTouchEnd}
     >
       <HousesRenderer items={houses} position={position} />
+      <div className={styles.main_cursor}></div>
     </div>
   );
 }

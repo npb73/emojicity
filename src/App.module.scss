@@ -38,3 +38,12 @@ html, body {
         }
     }
 }
+
+.main_cursor {
+    position: absolute;
+    width: 21vh;
+    height: 21vh;
+
+    border: dashed 0.3vh rgb(255,255,255,0.1);
+    border-radius: 100%;
+}
