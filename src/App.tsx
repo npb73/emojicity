@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./App.module.scss"
 import { throttle } from 'lodash';
+import { hapticFeedback } from '@telegram-apps/sdk';
 
 type materialName = 'wood' | 'stone' | 'iron' | 'detail' | 'electicity' | 'science';
 
@@ -48,13 +49,6 @@ function HousesRenderer({ items, position }: HousesRendererProps) {
   );
 }
 
-// Добавляем типизацию для window.Telegram
-declare global {
-  interface Window {
-    Telegram?: any;
-  }
-}
-
 function App() {
   // Состояние для домов (чтобы можно было менять triggered)
   const [houses, setHouses] = useState<house[]>([
@@ -88,15 +82,9 @@ function App() {
         if (housesInCircle.includes(h) && !h.triggered) {
           setScore(s => s + 1);
 
-          // Таптик для Telegram Mini Apps по официальной документации
-          if (
-            typeof window !== 'undefined' &&
-            window.Telegram &&
-            window.Telegram.WebApp &&
-            window.Telegram.WebApp.HapticFeedback &&
-            typeof window.Telegram.WebApp.HapticFeedback.impactOccurred === 'function'
-          ) {
-            window.Telegram.WebApp.HapticFeedback.impactOccurred('medium');
+          // Таптик по доке Telegram Mini Apps SDK
+          if (hapticFeedback.impactOccurred.isAvailable()) {
+            hapticFeedback.impactOccurred('medium');
           }
 
           return { ...h, triggered: true };
