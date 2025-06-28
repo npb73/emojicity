@@ -10,12 +10,9 @@
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
     <script>
-      const overflow = 100
-      document.body.style.overflowY = 'hidden'
-      document.body.style.marginTop = `${overflow}px`
-      document.body.style.height = window.innerHeight + overflow + "px"
-      document.body.style.paddingBottom = `${overflow}px`
-      window.scrollTo(0, overflow);
+      document.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+      });
     </script>
   </body>
 </html>
