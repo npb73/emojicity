@@ -3,7 +3,7 @@ import styles from "./App.module.scss"
 function App() {
 
   return (
-    <div className="">
+    <div className={styles.main_container}>
 
     </div>
   )
