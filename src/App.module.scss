@@ -31,10 +31,18 @@ html, body {
 
         .house_container {
             position: absolute;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             
             .house_emoji {
                 font-size: 7vh;
+                position: absolute;
             }
+        }
+
+        .triggered_house {
+            animation: triggered 0.15s ease-in-out;
         }
     }
 }
@@ -46,4 +54,20 @@ html, body {
 
     border: dashed 0.3vh rgb(255,255,255,0.1);
     border-radius: 100%;
+}
+
+@keyframes triggered {
+    0% {
+        scale: 1 1;
+    }
+
+    50% {
+        scale: 0.5 2;
+
+    }
+
+    100% {
+        scale: 1 1;
+
+    }
 }

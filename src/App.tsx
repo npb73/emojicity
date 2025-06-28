@@ -36,13 +36,12 @@ function HousesRenderer({ items, position }: HousesRendererProps) {
       {/* Рендерим дома */}
       {items.map((house) => (
         <div 
-          key={house.id} 
           className={styles.house_container}
           style={{
             transform: `translate(${house.coords.x}px, ${house.coords.y}px)`,
           }}
         >
-          <div className={styles.house_emoji}>{house.emoji}</div>
+          <div className={`${styles.house_emoji} ${house.triggered ? styles.triggered_house : ''}`}>{house.emoji}</div>
         </div>
       ))}
     </div>
@@ -53,7 +52,7 @@ function App() {
   // Состояние для домов (чтобы можно было менять triggered)
   const [houses, setHouses] = useState<house[]>([
     {
-      id: 'tent',
+      id: '1',
       emoji: '⛺️',
       unlockPrice: 100,
       profit: 10,
@@ -62,19 +61,39 @@ function App() {
       triggered: false,
     },
   ]);
+  useEffect(() => {
+    for(let i = 0; i < 10; i++) {
+      for(let j = 0; j < 10; j++) {
+        houses.push({
+          id: i.toString(),
+          emoji: '⛺️',
+          unlockPrice: 100,
+          profit: 10,
+          price: [{ wood: 10, stone: 10 }],
+          coords: {
+            x: i*70,
+            y: j*70
+          },
+          triggered: false
+        })
+      } 
+      
+    }
+    
+  }, []);
 
   // Счёт
   const [score, setScore] = useState(0);
 
   // Радиус поиска (можно менять)
-  const radius = window.innerHeight * 0.1;
+  const radius = window.innerHeight * 0.12;
 
   // Вся логика поиска и начисления баллов
   const handleHousesInCircle = (houses: house[], position: { x: number; y: number }, radius: number) => {
     const housesInCircle = houses.filter(h => {
-      const dx = h.coords.x - position.x;
-      const dy = h.coords.y - position.y;
-      return Math.sqrt(dx * dx + dy * dy) <= radius;
+      const dx = h.coords.x - (position.x * -1);
+      const dy = h.coords.y - (position.y * -1);
+      return Math.sqrt(Math.abs(dx) * Math.abs(dx) + Math.abs(dy) * Math.abs(dy)) <= radius;
     });
 
     setHouses(prev =>
@@ -102,7 +121,7 @@ function App() {
 
   // Троттлим всю функцию
   const throttledHandleHousesInCircle = useRef(
-    throttle(handleHousesInCircle, 100)
+    throttle(handleHousesInCircle, 50)
   ).current;
 
   useEffect(() => {
