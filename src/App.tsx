@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import styles from "./App.module.scss"
 import { throttle } from 'lodash';
+import { hapticFeedback } from '@telegram-apps/sdk';
 
 type materialName = 'wood' | 'stone' | 'iron' | 'detail' | 'electicity' | 'science';
 
@@ -80,6 +81,12 @@ function App() {
       prev.map(h => {
         if (housesInCircle.includes(h) && !h.triggered) {
           setScore(s => s + 1);
+
+          // Таптик по доке Telegram Mini Apps SDK
+          if (hapticFeedback.impactOccurred.isAvailable()) {
+            hapticFeedback.impactOccurred('medium');
+          }
+
           return { ...h, triggered: true };
         }
         if (!housesInCircle.includes(h) && h.triggered) {
